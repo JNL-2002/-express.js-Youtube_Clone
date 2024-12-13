@@ -1,0 +1,6 @@
+node_modules/
+.env
+.sql
+test.html
+test.js
+한 일, 할 일.text
