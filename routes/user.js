@@ -6,11 +6,14 @@ const {
     profileUpload,
     bannerUpload,
     subscriber,
-    deleteSub
+    deleteSub,
+    user
         } = require('../controllers/userControllers');
 const {authMiddleware} = require('../middleware/authMiddleware');
-const {imageUpload} = require('../middleware/imageFileMiddleware');
+const {upload} = require('../middleware/FileMiddleware');
 
+// 회원 조회
+router.get('/', authMiddleware, user);
 
 // 로그인
 router.get('/login', login);
@@ -19,14 +22,14 @@ router.get('/login', login);
 router.post('/join', join);
 
 // 프로필 수정
-router.put('/profile', authMiddleware, imageUpload.single('profile'), profileUpload);
+router.put('/profile', authMiddleware, upload.single('profile'), profileUpload);
 
 // 배너 수정
-router.put('/banner', authMiddleware, imageUpload.single('banner'), bannerUpload);
+router.put('/banner', authMiddleware, upload.single('banner'), bannerUpload);
 
 // 구독 추가, 취소
-router.route('/sub', authMiddleware)
-    .post(subscriber)
-    .delete(deleteSub)
+router.route('/sub')
+    .post(authMiddleware, subscriber)
+    .delete(authMiddleware, deleteSub)
 
 module.exports = router;

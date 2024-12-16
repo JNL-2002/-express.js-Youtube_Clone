@@ -15,17 +15,30 @@ const s3 = new S3Client({
 });
 
 const fileFilter = (req, file, cb) => {
-    const Types = ['image/jpeg', 'image/png'];
+    const imageTypes = ['image/jpeg', 'image/png'];
+    const videoTypes = ['video/mp4'];
 
-    if (Types.includes(file.mimetype)) {
+    if (file.fieldname === 'profile' || file.fieldname === 'banner' || file.fieldname === 'thumbnail') {
+        if (imageTypes.includes(file.mimetype)) {
         return cb(null, true);
+    } else {
+        req.imageUploadFail = "이미지가 아닙니다."
+        return cb(null, false)
     }
-
-    req.imageUploadFail = "이미지가 아닙니다."
-    return cb(null, false);
 }
 
-exports.imageUpload = multer({
+    if (file.fieldname === 'videopost'){
+        if (videoTypes.includes(file.mimetype)) {
+            return cb(null, true)
+        } else {
+            req.videoUploadFail = "비디오가 아닙니다."
+            return cb(null, false)
+        }
+    }
+    
+    }
+
+exports.upload = multer({
     storage : multerS3({
         s3,
         bucket: process.env.AWS_S3_BUCKET,
@@ -39,7 +52,7 @@ exports.imageUpload = multer({
 });
 
 // 수정 시 전 사진 삭제
-exports.imageDelete = async (key) => {
+exports.Delete = async (key) => {
     try {
         const checkObj = new ListObjectsV2Command({
             Bucket: process.env.AWS_S3_BUCKET,

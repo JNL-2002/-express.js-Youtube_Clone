@@ -3,10 +3,42 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const {imageDelete} = require('../middleware/imageFileMiddleware');
+const {Delete} = require('../middleware/FileMiddleware');
+
+// 유저 조회
+exports.user = async (req, res) => {
+    const {id} = req.user
+    try {
+        // 유저 조회
+        const [selectUser] = await conn.query(`
+            SELECT
+                channels.email,
+                channels.name,
+                profiles.location AS profile_location
+            FROM channels
+            LEFT JOIN profiles
+                ON channels.id = profiles.channels_id
+            WHERE channels.id = ?
+        `, [id]);
+        
+        if(selectUser.length > 0) {
+            return res.status(200).json({
+                user : selectUser
+            })
+        }
+
+        return res.status(400).json({
+            message : "에러가 발생하였습니다."
+        })
+    } catch {
+        return res.status(500).json({
+            message : "서버 에러가 발생하였습니다."
+        })
+    }
+}
 
 // 회원가입
-exports.join = async (req, res, next) => {
+exports.join = async (req, res) => {
     const {email, password, name, description} = req.body;
 
     try {
@@ -84,12 +116,11 @@ exports.profileUpload = async (req, res) => {
             message : "이미지가 아닙니다."
         })
     }
-
     const {location, fieldname} = req.file;
     try {
         //default 값의 사진을 업로드 된 사진으로 수정한다.
         const [updateProfile] = await conn.query('UPDATE profiles SET location = ? WHERE channels_id = ?', [location, id]);
-        await imageDelete(`[user_id: ${id} - ${fieldname}]`);
+        await Delete(`[user_id: ${id} - ${fieldname}]`);
 
         if (updateProfile.affectedRows > 0){
         return res.status(201).json({
@@ -123,7 +154,7 @@ exports.bannerUpload = async (req, res) => {
     try {
         //default 값의 사진을 업로드 된 사진으로 수정한다.
         const [updateBanner] = await conn.query('UPDATE banners SET location = ? WHERE channels_id = ?', [location, id]);
-        await imageDelete(`[user_id: ${id} - ${fieldname}]`);
+        await Delete(`[user_id: ${id} - ${fieldname}]`);
 
         if (updateBanner.affectedRows > 0) {
             return res.status(201).json({
@@ -131,7 +162,7 @@ exports.bannerUpload = async (req, res) => {
             });
         }
 
-        return res.status(404).json({
+        return res.status(400).json({
             message : "에러가 발생하였습니다."
         });
     } catch {
@@ -167,7 +198,7 @@ exports.subscriber = async (req, res) => {
             });
         }
 
-        res.status(404).json({
+        res.status(400).json({
             message : "에러가 발생하였습니다."
         });
     } catch {
