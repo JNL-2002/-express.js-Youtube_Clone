@@ -5,7 +5,7 @@ exports.conn = mysql.createPool({
     user : 'root',
     password : process.env.DBPW,
     database : 'ytClone',
-    host : '127.0.0.1',
+    host : process.env.DB_HOST,
     port : '3306',
 });
 

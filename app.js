@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 require('dotenv').config();
 
 
@@ -11,8 +12,14 @@ const watchRouter = require('./routes/watch');
 // json을 해석하기 위한 것
 app.use(express.json());
 
+// cors
+app.use(cors({
+    origin : 'http://localhost:5173',
+    credentials : true
+}));
+
 // 메인 페이지
-app.use('/main', mainRouter);
+app.use('/', mainRouter);
 app.use('/watch', watchRouter);
 app.use('/channel', channelRouter);
 app.use('/user', userRouter);

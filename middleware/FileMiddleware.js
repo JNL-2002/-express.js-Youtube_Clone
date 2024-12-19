@@ -54,21 +54,22 @@ exports.upload = multer({
 // 수정 시 전 사진 삭제
 exports.Delete = async (key, url, method) => {
     try {
+
+        if (url === 'videopost' && (method === 'DELETE' || method === 'PUT')) {
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket : process.env.AWS_S3_BUCKET,
+                Key : key
+            })
+            const result = await s3.send(deleteCommand);
+            return result;
+        }
+
         const checkObj = new ListObjectsV2Command({
             Bucket: process.env.AWS_S3_BUCKET,
             Prefix: key
         });
 
         const date = await s3.send(checkObj);
-
-        if (url === 'videopost' && method === 'DELETE') {
-            const deleteCommand = new DeleteObjectCommand({
-                Bucket : process.env.AWS_S3_BUCKET,
-                Key : date.Contents[0].Key
-            })
-            const result = await s3.send(deleteCommand);
-            return result;
-        }
         
         if (date.KeyCount > 1) {
             const deleteCommand = new DeleteObjectCommand({

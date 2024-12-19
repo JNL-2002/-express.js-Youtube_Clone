@@ -17,7 +17,7 @@ const {upload} = require('../middleware/FileMiddleware');
 router.get('/', authMiddleware, user);
 
 // 로그인
-router.get('/login', login);
+router.post('/login', login);
 
 // 회원가입
 router.post('/join', join);

@@ -4,9 +4,9 @@ const {Delete} = require('../middleware/FileMiddleware');
 // 채널 메인 페이지
 exports.channelMain = async (req, res) => {
     const {id} = req.params;
-    const {number} = req.query;
+    const {limit, number} = req.query;
     try {
-        if (!parseInt(number)){
+        if (!parseInt(number) || !parseInt(limit)){
             return res.status(400).json({
                 message : "잘못된 접근입니다."
             })
@@ -24,8 +24,8 @@ exports.channelMain = async (req, res) => {
             SELECT
                 channels.name,
                 channels.description,
-                profiles.location AS profile_location,
-                banners.location AS banner_location
+                profiles.location AS profileLocation,
+                banners.location AS bannerLocation
             FROM channels
             LEFT JOIN profiles
                 ON channels.id = profiles.channels_id
@@ -44,18 +44,18 @@ exports.channelMain = async (req, res) => {
             SELECT
                 channels.name,
                 videoposts.id,
-                videoposts.videopost_name,
-                videoposts.thumbnail_location,
-                videoposts.running_time,
+                videoposts.videopost_name AS videopostName,
+                videoposts.thumbnail_location AS thumbnailLocation,
+                videoposts.running_time AS runningTime,
                 videoposts.views,
-                videoposts.create_at
+                videoposts.create_at AS createAt
             FROM videoposts
             LEFT JOIN channels
                 ON videoposts.channels_id = channels.id
             WHERE videoposts.channels_id = ?
                 ORDER BY videoposts.id DESC
-            LIMIT 25 OFFSET ?
-            `, [id,pageNumber(parseInt(number))]);
+            LIMIT ? OFFSET ?
+            `, [id, parseInt(limit), pageNumber(parseInt(number))]);
         
         if (userChannel.length > 0){
             return res.status(200).json({
@@ -139,7 +139,6 @@ exports.videopostUpdate = async (req, res) => {
                     SET videopost_name = ?, description = ?
                     WHERE id = ? AND channels_id = ?
             `,[postName, description, videopostId, id]);
-
             if (updatePost.affectedRows > 0) {
                 return res.status(201).json({
                     message : "수정이 완료되었습니다."
@@ -153,6 +152,12 @@ exports.videopostUpdate = async (req, res) => {
 
     // 썸네일 까지 수정한 경우
     const {location} = req.file
+
+    const [preLocation] = await conn.query('SELECT thumbnail_location FROM videoposts WHERE channels_id = ? AND id = ?',
+        [id, videopostId]
+    )
+
+    const thumbnailUrl = new URL(preLocation[0].thumbnail_location).pathname
     const [updatePost] = await conn.query(`
             UPDATE videoposts
                     SET videopost_name = ?, thumbnail_location = ? ,
@@ -160,6 +165,8 @@ exports.videopostUpdate = async (req, res) => {
                     WHERE id = ? AND channels_id = ?
         `,[postName, location, description, videopostId, id]);
         if (updatePost.affectedRows > 0) {
+            await Delete(`[user_id: ${id} - thumbnail]${decoded(thumbnailUrl)}`, req.url.split('/')[1], req.method);
+
             return res.status(201).json({
                 message : "수정이 완료되었습니다."
             })
@@ -192,19 +199,13 @@ exports.videopostDelete = async (req, res) => {
         if (videopostLocation.length > 0){
         const videoUrl = new URL(videopostLocation[0].video_location).pathname;
         const thumbnailUrl = new URL(videopostLocation[0].thumbnail_location).pathname;
-
-        const decoded = (url) => {
-            const index = url.indexOf('%5D') + 3;
-            const result = url.substring(index);
-            return result;
-        }
-
+       
             await Delete(`[user_id: ${id} - videopost]${decoded(videoUrl)}`, req.url.split('/')[1], req.method);
             await Delete(`[user_id: ${id} - thumbnail]${decoded(thumbnailUrl)}`, req.url.split('/')[1], req.method);
             
             const [deletePost] = await conn.query(`
                 DELETE FROM videoposts WHERE id = ? AND channels_id = ?
-                `, [id, videopostId]);
+                `, [videopostId, id]);
 
             if (deletePost.affectedRows > 0) {
                 return res.status(200).json({
@@ -225,4 +226,11 @@ exports.videopostDelete = async (req, res) => {
             error : "서버에러가 발생하였습니다."
         })
     }
+}
+
+
+const decoded = (url) => {
+    const index = url.indexOf('%5D') + 3;
+    const result = url.substring(index);
+    return result;
 }

@@ -4,7 +4,7 @@ const {authMiddleware} = require('../middleware/authMiddleware');
 const {search} =require('../controllers/mainControllers');
 
 //메인 페이지
-router.get('/',);
+router.get('/p',);
 
 //검색 페이지
 router.get('/results', search);

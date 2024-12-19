@@ -10,7 +10,7 @@ const {
 const {upload} = require('../middleware/FileMiddleware');
 
 //채널 메인 페이지
-router.get('/:id/pages', channelMain);
+router.get('/:id/p', channelMain);
 
 //영상 업로드,수정,삭제
 router.post('/videopost', authMiddleware, upload.fields([

@@ -14,7 +14,7 @@ exports.user = async (req, res) => {
             SELECT
                 channels.email,
                 channels.name,
-                profiles.location AS profile_location
+                profiles.location AS profileLocation
             FROM channels
             LEFT JOIN profiles
                 ON channels.id = profiles.channels_id
@@ -178,7 +178,7 @@ exports.selectSub = async (req, res) => {
         const [subData] = await conn.query(`
             SELECT
                 channels.name,
-                profiles.location
+                profiles.location AS profileLocation
             FROM subscribers
             LEFT JOIN channels
                 ON subscribers.subscribed_id = channels.id
