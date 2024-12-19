@@ -22,9 +22,7 @@ exports.user = async (req, res) => {
         `, [id]);
         
         if(selectUser.length > 0) {
-            return res.status(200).json({
-                user : selectUser
-            })
+            return res.status(200).json(selectUser)
         }
 
         return res.status(400).json({
@@ -169,6 +167,41 @@ exports.bannerUpload = async (req, res) => {
         res.status(500).json({
             message : "서버 에러가 발생하였습니다."
         });
+    }
+}
+
+// 구독 조회
+exports.selectSub = async (req, res) => {
+    const {id} = req.user;
+    
+    try {
+        const [subData] = await conn.query(`
+            SELECT
+                channels.name,
+                profiles.location
+            FROM subscribers
+            LEFT JOIN channels
+                ON subscribers.subscribed_id = channels.id
+            LEFT JOIN profiles
+                ON subscribers.subscribed_id = profiles.channels_id
+                WHERE subscribers.channels_id = ?
+            `, [id]);
+            
+            if (subData.length > 0) {
+                return res.status(200).json(subData);
+            } else if (subData.length === 0) {
+                return res.status(404).json({
+                     message : "구독 정보가 존재하지 않습니다."
+                });
+            }
+
+            return res.status(400).json({
+                message : "에러가 발생하였습니다."
+            })
+    } catch {
+        res.status(500).json({
+            message : "서버 에러가 발생하였습니다."
+        })
     }
 }
 

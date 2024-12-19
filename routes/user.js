@@ -6,6 +6,7 @@ const {
     profileUpload,
     bannerUpload,
     subscriber,
+    selectSub,
     deleteSub,
     user
         } = require('../controllers/userControllers');
@@ -27,8 +28,9 @@ router.put('/profile', authMiddleware, upload.single('profile'), profileUpload);
 // 배너 수정
 router.put('/banner', authMiddleware, upload.single('banner'), bannerUpload);
 
-// 구독 추가, 취소
+// 구독 조회, 추가, 취소
 router.route('/sub')
+    .get(authMiddleware, selectSub)
     .post(authMiddleware, subscriber)
     .delete(authMiddleware, deleteSub)
 

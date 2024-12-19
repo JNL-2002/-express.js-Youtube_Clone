@@ -52,7 +52,7 @@ exports.upload = multer({
 });
 
 // 수정 시 전 사진 삭제
-exports.Delete = async (key) => {
+exports.Delete = async (key, url, method) => {
     try {
         const checkObj = new ListObjectsV2Command({
             Bucket: process.env.AWS_S3_BUCKET,
@@ -60,6 +60,15 @@ exports.Delete = async (key) => {
         });
 
         const date = await s3.send(checkObj);
+
+        if (url === 'videopost' && method === 'DELETE') {
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket : process.env.AWS_S3_BUCKET,
+                Key : date.Contents[0].Key
+            })
+            const result = await s3.send(deleteCommand);
+            return result;
+        }
         
         if (date.KeyCount > 1) {
             const deleteCommand = new DeleteObjectCommand({
@@ -70,7 +79,7 @@ exports.Delete = async (key) => {
         }
         return date;
     } catch (err) {
-        console.error(err);
+        throw err;
     }
 }
 
