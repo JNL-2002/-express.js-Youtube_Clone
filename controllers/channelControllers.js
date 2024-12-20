@@ -12,11 +12,11 @@ exports.channelMain = async (req, res) => {
             })
         }
 
-        const pageNumber = (N) => {
+        const pageNumber = (N, L) => {
             if (N === 1) {
                 return 0
             } else {
-                return (N - 1) * 25 
+                return (N - 1) * L
             }
         }
 
@@ -46,6 +46,7 @@ exports.channelMain = async (req, res) => {
                 videoposts.id,
                 videoposts.videopost_name AS videopostName,
                 videoposts.thumbnail_location AS thumbnailLocation,
+                videoposts.video_location AS videoLocation,
                 videoposts.running_time AS runningTime,
                 videoposts.views,
                 videoposts.create_at AS createAt
@@ -55,7 +56,7 @@ exports.channelMain = async (req, res) => {
             WHERE videoposts.channels_id = ?
                 ORDER BY videoposts.id DESC
             LIMIT ? OFFSET ?
-            `, [id, parseInt(limit), pageNumber(parseInt(number))]);
+            `, [id, parseInt(limit), pageNumber(parseInt(number),parseInt(limit))]);
         
         if (userChannel.length > 0){
             return res.status(200).json({

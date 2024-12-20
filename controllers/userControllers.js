@@ -9,7 +9,6 @@ const {Delete} = require('../middleware/FileMiddleware');
 exports.user = async (req, res) => {
     const {id} = req.user
     try {
-        // 유저 조회
         const [selectUser] = await conn.query(`
             SELECT
                 channels.email,
@@ -22,7 +21,7 @@ exports.user = async (req, res) => {
         `, [id]);
         
         if(selectUser.length > 0) {
-            return res.status(200).json(selectUser)
+            return res.status(200).json(selectUser[0])
         }
 
         return res.status(400).json({
@@ -177,6 +176,7 @@ exports.selectSub = async (req, res) => {
     try {
         const [subData] = await conn.query(`
             SELECT
+                subscribers.subscribed_id AS channelId,
                 channels.name,
                 profiles.location AS profileLocation
             FROM subscribers

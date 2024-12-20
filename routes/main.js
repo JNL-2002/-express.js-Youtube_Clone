@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const {authMiddleware} = require('../middleware/authMiddleware');
-const {search} =require('../controllers/mainControllers');
+const {
+    main,
+    search
+        } =require('../controllers/mainControllers');
 
 //메인 페이지
-router.get('/p',);
+router.get('/p', main);
 
 //검색 페이지
 router.get('/results', search);
