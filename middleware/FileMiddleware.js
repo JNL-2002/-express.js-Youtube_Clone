@@ -55,7 +55,7 @@ exports.upload = multer({
 exports.Delete = async (key, url, method) => {
     try {
 
-        if (url === 'videopost' && (method === 'DELETE' || method === 'PUT')) {
+        if (url === 'v' && (method === 'DELETE' || method === 'PUT')) {
             const deleteCommand = new DeleteObjectCommand({
                 Bucket : process.env.AWS_S3_BUCKET,
                 Key : key

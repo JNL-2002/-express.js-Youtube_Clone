@@ -3,11 +3,9 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 
-
-const mainRouter = require('./routes/main');
 const channelRouter = require('./routes/channel');
 const userRouter = require('./routes/user');
-const watchRouter = require('./routes/watch');
+const videosRouter = require('./routes/videos');
 
 // json을 해석하기 위한 것
 app.use(express.json());
@@ -18,9 +16,8 @@ app.use(cors({
     credentials : true
 }));
 
-// 메인 페이지
-app.use('/', mainRouter);
-app.use('/watch', watchRouter);
+
+app.use('/videos', videosRouter);
 app.use('/channel', channelRouter);
 app.use('/user', userRouter);
 

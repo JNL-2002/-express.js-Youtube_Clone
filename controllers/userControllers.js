@@ -11,6 +11,7 @@ exports.user = async (req, res) => {
     try {
         const [selectUser] = await conn.query(`
             SELECT
+                channels.id AS channelId,
                 channels.email,
                 channels.name,
                 profiles.location AS profileLocation
