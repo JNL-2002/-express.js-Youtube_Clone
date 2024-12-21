@@ -1,8 +1,5 @@
 const {conn} = require('../config/db');
 const {Delete} = require('../middleware/FileMiddleware');
-const {spawn} = require('child_process');
-
-require('../middleware/')
 
 // 검색 동영상 조회
 exports.search = async (req, res) => {
@@ -10,11 +7,7 @@ exports.search = async (req, res) => {
 
     
     // 한국어 일때
-    const process = spawn('python', ['../middleware/search.py', search_query], {
-        encoding : "utf8"
-    });
-
-    const searchData = await process.stdout.on('data')
+    
 
     // 영어 일 때
 
