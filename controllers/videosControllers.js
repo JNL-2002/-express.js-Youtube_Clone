@@ -1,6 +1,6 @@
 const {conn} = require('../config/db');
 const {Delete} = require('../middleware/FileMiddleware');
-const spawn = require('child_process').spawn;
+const {spawn} = require('child_process');
 
 require('../middleware/')
 
@@ -17,6 +17,8 @@ exports.search = async (req, res) => {
     const searchData = await process.stdout.on('data')
 
     // 영어 일 때
+
+    // 영어랑 한국어 섞여있을 때
 
 }
 
