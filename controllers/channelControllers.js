@@ -43,6 +43,7 @@ exports.channelMain = async (req, res) => {
             message : "에러가 발생하였습니다."
         })
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             message : "서버 에러가 발생하였습니다."
         })
