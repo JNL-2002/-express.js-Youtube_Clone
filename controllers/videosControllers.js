@@ -4,12 +4,26 @@ const {Delete} = require('../middleware/FileMiddleware');
 
 // 검색 동영상 조회
 exports.search = async (req, res) => {
-    const {search_query} = req.query;
+    const {search_query, limit, page} = req.query;
 
     const result = search_query.replace(/[^\w\s가-힣]/g, '');
     //const dNumber = result.replace(/\d+/g, "");
         try {
+        if (!parseInt(page) || !parseInt(limit)){
+            return res.status(400).json({
+                message : "잘못된 접근입니다."
+            })
+        }
+            
         // const searchdata = await search(dNumber);
+
+            const pageNumber = (N, L) => {
+            if (N === 1) {
+                return 0
+            } else {
+                return ((N - 1) * L)
+            }
+        }
     
         // 띄워쓰기 기준 모든 문장이 일치하는 경우
         const [firstSearch] = await conn.query(`
@@ -28,11 +42,29 @@ exports.search = async (req, res) => {
                 ON videoposts.channels_id = channels.id
             WHERE
             MATCH(videoposts.videopost_name, videoposts.description)
-            AGAINST(? IN BOOLEAN MODE)
-            `, result)
+            AGAINST(?)
+            LIMIT ? OFFSET ?
+            `, [result, parseInt(limit), pageNumber(parseInt(page),parseInt(limit))])
 
-            console.log(firstSearch);
+            const NextPage = Math.ceil(firstSearch.length / limit) === page ? false : true
+            
+            if (firstSearch.length > 0) {
+                return res.status(200).json({
+                    videos : firstSearch,
+                    meta : {
+                        currentPage : page,
+                        hasNextPage : NextPage
+                        }
+                })
+            } else if (firstSearch.length == 0) {
+                return res.status(404).json({
+                    message : "영상이 존재하지 않습니다."
+                })
+            }
 
+            return res.status(400).json({
+                message : "에러가 발생하였습니다."
+            })
     // // 순 (한국어)
     // if (searchdata.some(i => i[1].startsWith('NN'))) {
     //     if (searchdata.every(i => i[1] !== 'OL')) {
@@ -66,6 +98,9 @@ exports.search = async (req, res) => {
     // }
     } catch (err) {
         console.log(err)
+            return res.status(500).json({
+                message : "서버에러가 발생하였습니다"
+            })
     }
 }
 
