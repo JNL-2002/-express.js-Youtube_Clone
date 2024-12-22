@@ -39,18 +39,19 @@
 // console.log(results)
 // }
 
-const spawn = require('child_process').spawn;
+// const spawn = require('child_process').spawn;
 
-const searchData = "안녕하세용용"
+// let searchData = "안녕하세용용"
 
-const process = spawn('python', ['search.py', `${searchData}`], {
-    encoding : "utf8"
-});
+// const process = spawn('python', ['search.py', `${searchData}`], {
+//     encoding : "utf8"
+// });
 
 
-process.stdout.on('data', function add (data) {
-    const searchData1 = data.toString();
-    console.log(searchData1)
-});
+// process.stdout.on('data', function add (data) {
+//     const searchData1 = data.toString();
+//     searchData = searchData1
+//     return console.log(searchData); 
+// });
 
 

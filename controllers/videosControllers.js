@@ -1,18 +1,73 @@
 const {conn} = require('../config/db');
 const {Delete} = require('../middleware/FileMiddleware');
+// const {search} = require('../middleware/searchMiddleware');
 
 // 검색 동영상 조회
 exports.search = async (req, res) => {
     const {search_query} = req.query;
 
-    
-    // 한국어 일때
-    
+    const result = search_query.replace(/[^\w\s가-힣]/g, '');
+    const dNumber = result.replace(/\d+/g, "");
+        try {
+        // const searchdata = await search(dNumber);
+        
+        console.log(typeof(result), typeof(dNumber))
+        // 띄워쓰기 기준 모든 문장이 일치하는 경우
+        const [firstSearch] = await conn.query(`
+            SELECT
+                channels.id AS channelId,
+                channels.name,
+                videoposts.id AS videopostId,
+                videoposts.videopost_name AS videopostName,
+                videoposts.thumbnail_location AS thumbnailLocation,
+                videoposts.video_location AS videoLocation,
+                videoposts.views,
+                videoposts.create_at AS createAt,
+                videoposts.running_time AS runningTime
+            FROM videoposts
+            LEFT JOIN channels
+                ON videoposts.channels_id = channels.id
+            WHERE
+            MATCH(videoposts.videopost_name, videoposts.description)
+            AGAINST(? IN BOOLEAN MODE)
+            `, result)
 
-    // 영어 일 때
+            console.log(firstSearch);
 
-    // 영어랑 한국어 섞여있을 때
+    // // 순 (한국어)
+    // if (searchdata.some(i => i[1].startsWith('NN'))) {
+    //     if (searchdata.every(i => i[1] !== 'OL')) {
+    //         // 완전 한국어 
+    //         // 문장에 NN으로 시작하는 한국 단어만 있는 경우
+    //         const stNN = searchdata.filter(i => i[1].startsWith('NN'))
+    //             .map(i => i[0])
 
+
+    //     }
+    // } else if (!searchdata.some(i => i[1].startsWith('NN'))) {
+    //     if (searchdata.every(i => i[1] !== 'OL')) {
+    //         // 완전 한국어
+
+    //     }
+    // }
+
+    // // 순 (영어)
+    // if (searchdata.every(i => i[1] === 'OL')) {
+
+    // }
+    // // 영어랑 한국어 섞여있을 때
+    // if (searchdata.some(i => i[1].startsWith('NN'))) {
+    //     if (searchdata.some(i => i[1] === 'OL')) {
+            
+    //     }
+    // } else if (!searchdata.some(i => i[1].startsWith('NN'))) {
+    //     if (searchdata.some(i => i[1] === 'OL')) {
+            
+    //     }
+    // }
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 // 개별 조회 
@@ -29,7 +84,9 @@ exports.getPost = async (req, res) => {
         const [count] = await conn.query ('SELECT count(*) AS subCount FROM subscribers WHERE subscribed_id = ?', [checkPost[0].channels_id]);
         const [addPost] = await conn.query(`
             SELECT
+                channels.id AS channelId,
                 channels.name,
+                videoposts.id AS videopostId,
                 profiles.location AS profileLocation,
                 videoposts.videopost_name AS videopostName,
                 videoposts.video_location AS videoLocation,
@@ -62,12 +119,21 @@ exports.getPost = async (req, res) => {
 // 전체 조회
 exports.allPost = async (req, res) => {
     const {limit, page} = req.query;
-    try{
+    const channelId = null
+    if (!req.query.channelId) {
+        channelId = null
+    } else if (req.query.channelId) {
+        channelId = req.query.channelId
+    }
+
+    try {
         if (!parseInt(page) || !parseInt(limit)){
             return res.status(400).json({
                 message : "잘못된 접근입니다."
             })
         }
+
+        
 
         const pageNumber = (N, L) => {
             if (N === 1) {
@@ -79,6 +145,7 @@ exports.allPost = async (req, res) => {
 
         const [videoPost] = await conn.query(`
             SELECT
+                channels.id AS channelId,
                 channels.name,
                 profiles.location AS profileLocation,
                 videoposts.id AS videopostId,
@@ -93,12 +160,22 @@ exports.allPost = async (req, res) => {
                 ON videoposts.channels_id = channels.id
             LEFT JOIN profiles
                 ON videoposts.channels_id = profiles.channels_id
+            WHERE
+                (? IS NULL OR videoposts.channels_id = ?)
             ORDER BY videoposts.id DESC
             LIMIT ? OFFSET ?
-            `, [parseInt(limit), pageNumber(parseInt(page),parseInt(limit))]);
+            `, [channelId, channelId, parseInt(limit), pageNumber(parseInt(page),parseInt(limit))]);
 
-            if (videoPost.length > 0) {
-                return res.status(200).json(videoPost)
+            const NextPage = Math.ceil(videoPost.length / limit) === page ? false : true
+
+            if (videoPost.length > 0) { 
+                return res.status(200).json({
+                    videos : videoPost,
+                    meta : {
+                        currentPage : page,
+                        hasNextPage : NextPage
+                    }
+                })
             }
             
             return res.status(400).json({

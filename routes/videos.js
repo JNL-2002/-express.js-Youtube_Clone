@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const {authMiddleware} = require('../middleware/authMiddleware');
 const {
-    getPost, 
+    search,
+    getPost,
     allPost,
     videopostUpload,
     videopostUpdate,
@@ -11,7 +12,7 @@ const {
 const {upload} = require('../middleware/FileMiddleware');
 
 // 검색 동영상 조회
-router.get('/')
+router.get('/s', search);
 
 //개별 동영상 조회
 router.get('/:videosId', getPost);

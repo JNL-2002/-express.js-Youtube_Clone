@@ -2,4 +2,6 @@ node_modules/
 .env
 .sql
 test.html
+test.js
+test.py
 한 일, 할 일.text
