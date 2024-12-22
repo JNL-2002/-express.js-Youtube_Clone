@@ -4,11 +4,6 @@ const {conn} = require('../config/db');
 exports.channelMain = async (req, res) => {
     const {id} = req.params;
     try {
-        if (!parseInt(page) || !parseInt(limit)){
-            return res.status(400).json({
-                message : "잘못된 접근입니다."
-            })
-        }
 
         const [userChannel] = await conn.query(`
             SELECT
