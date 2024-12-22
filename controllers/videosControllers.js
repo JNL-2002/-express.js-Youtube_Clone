@@ -205,6 +205,10 @@ exports.allPost = async (req, res) => {
                         hasNextPage : NextPage
                     }
                 })
+            } else if (videoPost.length == 0) {
+                return res.status(404).json({
+                    message : "영상이 존재하지 않습니다"
+                })
             }
             
             return res.status(400).json({
