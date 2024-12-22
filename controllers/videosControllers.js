@@ -46,7 +46,7 @@ exports.search = async (req, res) => {
             LIMIT ? OFFSET ?
             `, [result, parseInt(limit), pageNumber(parseInt(page),parseInt(limit))])
 
-            const NextPage = Math.ceil(firstSearch.length / limit) === page ? false : true
+            const NextPage = Math.ceil(firstSearch.length / limit) === parseInt(page) ? false : true
             
             if (firstSearch.length > 0) {
                 return res.status(200).json({
@@ -195,7 +195,7 @@ exports.allPost = async (req, res) => {
             LIMIT ? OFFSET ?
             `, [channelId, channelId, parseInt(limit), pageNumber(parseInt(page),parseInt(limit))]);
 
-            const NextPage = Math.ceil(videoPost.length / limit) === page ? false : true
+            const NextPage = Math.ceil(videoPost.length / limit) === parseInt(page) ? false : true
 
             if (videoPost.length > 0) { 
                 return res.status(200).json({
