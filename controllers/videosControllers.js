@@ -6,12 +6,11 @@ const {Delete} = require('../middleware/FileMiddleware');
 exports.search = async (req, res) => {
     const {search_query} = req.query;
 
-    const result = search_query.replace(/[^\w\s가-힣]/g, '');
-    const dNumber = result.replace(/\d+/g, "");
+    //const result = search_query.replace(/[^\w\s가-힣]/g, '');
+    //const dNumber = result.replace(/\d+/g, "");
         try {
         // const searchdata = await search(dNumber);
-        
-        console.log(typeof(result), typeof(dNumber))
+    
         // 띄워쓰기 기준 모든 문장이 일치하는 경우
         const [firstSearch] = await conn.query(`
             SELECT
@@ -119,12 +118,7 @@ exports.getPost = async (req, res) => {
 // 전체 조회
 exports.allPost = async (req, res) => {
     const {limit, page} = req.query;
-    const channelId = null
-    if (!req.query.channelId) {
-        channelId = null
-    } else if (req.query.channelId) {
-        channelId = req.query.channelId
-    }
+    const channelId = req.query.channelId ? req.query.channelId : null;
 
     try {
         if (!parseInt(page) || !parseInt(limit)){
