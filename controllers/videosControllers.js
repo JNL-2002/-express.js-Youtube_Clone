@@ -6,7 +6,7 @@ const {Delete} = require('../middleware/FileMiddleware');
 exports.search = async (req, res) => {
     const {search_query} = req.query;
 
-    //const result = search_query.replace(/[^\w\s가-힣]/g, '');
+    const result = search_query.replace(/[^\w\s가-힣]/g, '');
     //const dNumber = result.replace(/\d+/g, "");
         try {
         // const searchdata = await search(dNumber);
