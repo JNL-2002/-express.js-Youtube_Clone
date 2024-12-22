@@ -4,7 +4,12 @@ const {conn} = require('../config/db');
 exports.channelMain = async (req, res) => {
     const {id} = req.params;
     try {
-
+     const [count] = await conn.query(`
+            SELECT
+                (SELECT count(*) FROM videoposts WHERE channels_id = ?) AS videoCount,
+                (SELECT count(*) FROM subscribers WHERE subscribed_id = ?) AS subCount
+                `, [id,id]);
+        
         const [userChannel] = await conn.query(`
             SELECT
                 channels.id AS channleId,
@@ -22,13 +27,7 @@ exports.channelMain = async (req, res) => {
                 ON channels.id = banners.channels_id
             WHERE channels.id = ?
             `, [count[0].videoCount, count[0].subCount, id]);
-
-        const [count] = await conn.query(`
-            SELECT
-                (SELECT count(*) FROM videoposts WHERE channels_id = ?) AS videoCount,
-                (SELECT count(*) FROM subscribers WHERE subscribed_id = ?) AS subCount
-                `, [id,id]);
-        
+       
         if (userChannel.length > 0){
             return res.status(200).json(
                 userChannel[0]
