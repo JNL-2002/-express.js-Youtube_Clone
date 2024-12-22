@@ -14,7 +14,7 @@ exports.channelMain = async (req, res) => {
             SELECT
                 channels.id AS channleId,
                 channels.name,
-                channels.emali,
+                channels.email,
                 channels.description,
                 profiles.location AS profileLocation,
                 banners.location AS bannerLocation,
